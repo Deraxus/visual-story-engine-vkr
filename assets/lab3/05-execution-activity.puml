@@ -1,0 +1,70 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 17
+skinparam shadowing false
+skinparam ArrowColor #475569
+skinparam LineColor #475569
+skinparam RoundCorner 6
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam classBackgroundColor #F1F5F9
+skinparam classBorderColor #475569
+skinparam componentBackgroundColor #EFF6FF
+skinparam componentBorderColor #475569
+skinparam interfaceBackgroundColor #FFFFFF
+skinparam activityBackgroundColor #EFF6FF
+skinparam activityBorderColor #475569
+skinparam activityDiamondBackgroundColor #FEF3C7
+skinparam activityDiamondBorderColor #92400E
+skinparam noteBackgroundColor #FFF7ED
+skinparam noteBorderColor #C2410C
+skinparam sequenceMessageAlign center
+skinparam sequenceParticipantBackgroundColor #EFF6FF
+skinparam sequenceParticipantBorderColor #475569
+skinparam sequenceLifeLineBorderColor #94A3B8
+skinparam sequenceGroupBackgroundColor #F8FAFC
+skinparam sequenceGroupBorderColor #64748B
+
+title М5. Выдача следующего кадра — UML-активность
+start
+:MoveNext после Start, Advance\nили принятого выбора;
+if (Вызов допустим для текущей фазы?) then (нет)
+  :Не менять состояние;\nзаписать CommandRejected;
+  stop
+else (да)
+  :phase = Busy;
+endif
+while (Текущая последовательность закончилась?) is (да)
+  if (Стек возвратов пуст?) then (да)
+    :phase = Finished;\nпоказать завершение истории;\nStoryFinished в ITraceSink;\nFR-07, FR-10;
+    stop
+  else (нет)
+    :Восстановить cursor = pop();\nFR-06;
+  endif
+endwhile (нет)
+:Получить frames[nextFrameIndex];\nувеличить nextFrameIndex на 1;\nзаписать currentFrameId;
+:Применить SceneDelta;\nFR-03;
+if (Тип кадра = Choice?) then (да)
+  :Вычислить доступные варианты;\nFR-04;
+  if (Есть хотя бы один доступный?) then (нет)
+    :phase = Error;\nNO_AVAILABLE_CHOICE;\nStoryError в ITraceSink;\nпоказать причину остановки;
+    stop
+  else (да)
+    :phase = AwaitingChoice;\nпоказать варианты;\nскрыть панель реплик;
+  endif
+else (нет)
+  :phase = AwaitingAdvance;\nпоказать Narration / CharacterLine;\nскрыть панель вариантов;\nFR-02;
+endif
+:Передать FramePresented в ITraceSink;\nFR-10;
+stop
+note right
+  Advance разрешён только в AwaitingAdvance.
+  В AwaitingChoice принимается Select.
+  Start создаёт новое состояние сессии.
+  NFR-01: переходы детерминированы.
+end note
+
+@enduml

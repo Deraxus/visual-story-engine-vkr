@@ -1,0 +1,79 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 17
+skinparam shadowing false
+skinparam ArrowColor #475569
+skinparam LineColor #475569
+skinparam RoundCorner 6
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam classBackgroundColor #F1F5F9
+skinparam classBorderColor #475569
+skinparam componentBackgroundColor #EFF6FF
+skinparam componentBorderColor #475569
+skinparam interfaceBackgroundColor #FFFFFF
+skinparam activityBackgroundColor #EFF6FF
+skinparam activityBorderColor #475569
+skinparam activityDiamondBackgroundColor #FEF3C7
+skinparam activityDiamondBorderColor #92400E
+skinparam noteBackgroundColor #FFF7ED
+skinparam noteBorderColor #C2410C
+skinparam sequenceMessageAlign center
+skinparam sequenceParticipantBackgroundColor #EFF6FF
+skinparam sequenceParticipantBorderColor #475569
+skinparam sequenceLifeLineBorderColor #94A3B8
+skinparam sequenceGroupBackgroundColor #F8FAFC
+skinparam sequenceGroupBorderColor #64748B
+
+title М4. Принятие выбора — UML-последовательность
+hide footbox
+actor Игрок as User
+boundary "ChoicePanel" as UI
+control "StoryRunner" as Runner
+control "ChoiceRules" as Rules
+entity "StoryState" as State
+participant "ITraceSink" as Trace
+User -> UI : нажать вариант
+UI -> Runner : Select(choiceId, expectedFrameId)
+Runner -> Rules : Prepare(request, story, readonly state)
+note over Rules, State
+  FR-04, FR-05: проверяются фаза, ID кадра,
+  принадлежность варианта и все пороговые условия.
+  Новые значения вычисляются без изменения state.
+  Проверяются ссылка на ветку и переполнение int.
+end note
+Rules --> Runner : Rejected(code) или Prepared(values, branchId)
+alt запрос отклонён
+  Runner -> Trace : ChoiceRejected(code, frameId, choiceId)
+  Runner -> UI : обновить доступность / показать причину
+  note over State
+    NFR-06: значения и стек не изменяются.
+  end note
+else запрос принят
+  critical Фиксация одной команды в основном потоке
+    Runner -> State : Commit(values, savedCursor, branchId)
+    note right of State
+      phase = Busy;
+      заменить значения характеристик;
+      push(savedCursor);
+      cursor = (branchId, 0).
+    end note
+  end
+  Runner -> Trace : ChoiceAccepted(frameId, choiceId)
+  Runner -> Runner : MoveNext()
+  note over Runner, State
+    FR-06: пустая ветка сразу возвращает
+    сохранённую позицию из стека.
+  end note
+  Runner -> UI : Render(viewModel)
+end
+note over UI, Runner
+  Повторное событие со старым frameId
+  отклоняется следующей проверкой Prepare.
+  Последствия повторно не применяются.
+end note
+
+@enduml
