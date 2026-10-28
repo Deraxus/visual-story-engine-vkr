@@ -1,0 +1,50 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 17
+skinparam shadowing false
+skinparam ArrowColor #475569
+skinparam LineColor #475569
+skinparam RoundCorner 6
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam classBackgroundColor #F1F5F9
+skinparam classBorderColor #475569
+skinparam componentBackgroundColor #EFF6FF
+skinparam componentBorderColor #475569
+skinparam interfaceBackgroundColor #FFFFFF
+skinparam activityBackgroundColor #EFF6FF
+skinparam activityBorderColor #475569
+skinparam activityDiamondBackgroundColor #FEF3C7
+skinparam activityDiamondBorderColor #92400E
+skinparam noteBackgroundColor #FFF7ED
+skinparam noteBorderColor #C2410C
+skinparam sequenceMessageAlign center
+skinparam sequenceParticipantBackgroundColor #EFF6FF
+skinparam sequenceParticipantBorderColor #475569
+skinparam sequenceLifeLineBorderColor #94A3B8
+skinparam sequenceGroupBackgroundColor #F8FAFC
+skinparam sequenceGroupBorderColor #64748B
+
+ top to bottom direction
+ title М1. Компоненты движка
+ component "Engine.Editor\nStoryEditor / BuildValidator" as Editor
+ component "Engine.Core\nStoryRunner / ChoiceRules / StoryState\nStoryValidator\nКонтракты: IStoryView, IStoryRepository, ITraceSink" as Core
+ component "Engine.Unity\nInputController / ScenePresenter\nLocalAssetProvider / TraceWriter" as Runtime
+ component "Engine.Tests\nКонтрольные сценарии" as Tests
+ artifact "Локальные Unity assets\nStoryDefinition / ResourceCatalog" as Assets
+ Editor ..> Core : структурная проверка\nFR-08, FR-09
+ Editor ..> Assets : создание и изменение
+ Runtime ..> Core : Start / Advance / Select\nреализация контрактов
+ Runtime ..> Assets : только чтение\nNFR-04
+ Tests ..> Core : проверки трасс и состояния\nNFR-01, NFR-06
+ legend bottom
+   NFR-02: Engine.Core не зависит от UnityEngine и UnityEditor.
+   Engine.Editor и Engine.Tests не входят в Android Player.
+   ScenePresenter исполняет IStoryView; LocalAssetProvider — IStoryRepository;
+   TraceWriter — ITraceSink. Все определения контрактов находятся в Engine.Core.
+ endlegend
+
+@enduml

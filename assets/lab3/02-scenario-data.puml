@@ -1,0 +1,98 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 17
+skinparam shadowing false
+skinparam ArrowColor #475569
+skinparam LineColor #475569
+skinparam RoundCorner 6
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam classBackgroundColor #F1F5F9
+skinparam classBorderColor #475569
+skinparam componentBackgroundColor #EFF6FF
+skinparam componentBorderColor #475569
+skinparam interfaceBackgroundColor #FFFFFF
+skinparam activityBackgroundColor #EFF6FF
+skinparam activityBorderColor #475569
+skinparam activityDiamondBackgroundColor #FEF3C7
+skinparam activityDiamondBorderColor #92400E
+skinparam noteBackgroundColor #FFF7ED
+skinparam noteBorderColor #C2410C
+skinparam sequenceMessageAlign center
+skinparam sequenceParticipantBackgroundColor #EFF6FF
+skinparam sequenceParticipantBorderColor #475569
+skinparam sequenceLifeLineBorderColor #94A3B8
+skinparam sequenceGroupBackgroundColor #F8FAFC
+skinparam sequenceGroupBorderColor #64748B
+
+!pragma layout smetana
+top to bottom direction
+title М2. Данные сценария — UML-классы
+class StoryDefinition {
+  +storyId: string
+  +rootSequenceId: string
+  +sequences: List<StorySequence>
+  +resourceCatalog: ResourceCatalog
+}
+class StorySequence {
+  +sequenceId: string
+  +frames: List<StoryFrame>
+}
+class StoryFrame {
+  +frameId: string
+  +type: FrameType
+  +text: string
+  +speakerId: string [0..1]
+}
+class StoryChoice {
+  +choiceId: string
+  +text: string
+  +branchSequenceId: string
+}
+class StatCondition {
+  +statId: string
+  +minimum: int
+}
+class StatEffect {
+  +statId: string
+  +delta: int
+}
+class SceneDelta {
+  +backgroundMode: Keep | Set
+  +backgroundId: string [0..1]
+  +characterActions: CharacterAction[]
+}
+class ResourceCatalog {
+  +characters: CharacterDefinition[]
+  +backgrounds: BackgroundDefinition[]
+  +stats: StatDefinition[]
+}
+StoryDefinition "1" *-- "1..*" StorySequence : sequences
+StorySequence "1" *-- "0..*" StoryFrame : frames {ordered}
+StoryFrame "1" *-- "0..8" StoryChoice : choices {ordered}
+StoryChoice "0..1" --> "1" StorySequence : branchSequenceId
+StoryChoice "1" *-- "0..*" StatCondition : all conditions
+StoryChoice "1" *-- "0..*" StatEffect : effects
+StoryFrame "1" *-- "0..1" SceneDelta : sceneDelta
+StoryDefinition "1" --> "1" ResourceCatalog : resourceCatalog
+note right of StoryFrame
+  FrameType: Narration,
+  CharacterLine, Choice.
+  FR-02, FR-03, FR-04
+end note
+note bottom of StoryChoice
+  FR-05, FR-06: ветка задаётся ID,
+  а не рекурсивно вложенным массивом.
+  Пустая последовательность допустима.
+end note
+note top of StoryDefinition
+  FR-08, FR-09, NFR-03:
+  ID устойчивы; ссылки разрешаются
+  внутри одного сценария.
+  Граф вложенности — дерево без циклов.
+end note
+
+@enduml

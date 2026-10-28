@@ -1,0 +1,81 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 17
+skinparam shadowing false
+skinparam ArrowColor #475569
+skinparam LineColor #475569
+skinparam RoundCorner 6
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam classBackgroundColor #F1F5F9
+skinparam classBorderColor #475569
+skinparam componentBackgroundColor #EFF6FF
+skinparam componentBorderColor #475569
+skinparam interfaceBackgroundColor #FFFFFF
+skinparam activityBackgroundColor #EFF6FF
+skinparam activityBorderColor #475569
+skinparam activityDiamondBackgroundColor #FEF3C7
+skinparam activityDiamondBorderColor #92400E
+skinparam noteBackgroundColor #FFF7ED
+skinparam noteBorderColor #C2410C
+skinparam sequenceMessageAlign center
+skinparam sequenceParticipantBackgroundColor #EFF6FF
+skinparam sequenceParticipantBorderColor #475569
+skinparam sequenceLifeLineBorderColor #94A3B8
+skinparam sequenceGroupBackgroundColor #F8FAFC
+skinparam sequenceGroupBorderColor #64748B
+
+!pragma layout smetana
+top to bottom direction
+title М3. Состояние прохождения — UML-классы
+class StoryState {
+  +storyId: string
+  +phase: SessionPhase
+  +currentFrameId: string [0..1]
+  +statValues: Dictionary<StatId, int>
+}
+class ExecutionCursor {
+  +sequenceId: string
+  +nextFrameIndex: int
+}
+class ReturnPoint {
+  +cursor: ExecutionCursor
+}
+class SceneState {
+  +backgroundId: string [0..1]
+  +charactersBySlot: Dictionary<Slot, CharacterState>
+}
+class CharacterState {
+  +characterId: string
+  +clothesId: string
+  +emotionId: string
+}
+enum SessionPhase {
+  Busy
+  AwaitingAdvance
+  AwaitingChoice
+  Finished
+  Error
+}
+StoryState "1" *-- "1" ExecutionCursor : cursor
+StoryState "1" *-- "0..16" ReturnPoint : returnStack {LIFO}
+ReturnPoint "1" *-- "1" ExecutionCursor : копия позиции возврата
+StoryState "1" *-- "1" SceneState : scene
+SceneState "1" *-- "0..3" CharacterState : Left / Center / Right
+StoryState --> SessionPhase
+note right of ExecutionCursor
+  Индекс указывает на следующий
+  ещё не выданный кадр.
+  FR-01, FR-06, NFR-01
+end note
+note bottom of StoryState
+  FR-03, FR-05, NFR-06:
+  значения и сцена принадлежат сессии.
+  Определения ScriptableObject
+  при прохождении не изменяются.
+end note
+
+@enduml

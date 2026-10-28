@@ -1,0 +1,55 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 17
+skinparam shadowing false
+skinparam ArrowColor #475569
+skinparam LineColor #475569
+skinparam RoundCorner 6
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam classBackgroundColor #F1F5F9
+skinparam classBorderColor #475569
+skinparam componentBackgroundColor #EFF6FF
+skinparam componentBorderColor #475569
+skinparam interfaceBackgroundColor #FFFFFF
+skinparam activityBackgroundColor #EFF6FF
+skinparam activityBorderColor #475569
+skinparam activityDiamondBackgroundColor #FEF3C7
+skinparam activityDiamondBorderColor #92400E
+skinparam noteBackgroundColor #FFF7ED
+skinparam noteBorderColor #C2410C
+skinparam sequenceMessageAlign center
+skinparam sequenceParticipantBackgroundColor #EFF6FF
+skinparam sequenceParticipantBorderColor #475569
+skinparam sequenceLifeLineBorderColor #94A3B8
+skinparam sequenceGroupBackgroundColor #F8FAFC
+skinparam sequenceGroupBorderColor #64748B
+
+title М6. AS-IS — ручная подготовка сценария
+start
+repeat
+  partition Автор {
+    :Изменить вложенные массивы кадров\nи вариантов через Inspector;
+    :Назначить ссылки на персонажей,\nфоны и характеристики;
+  }
+  partition "Unity Editor" {
+    :Сериализовать данные сцены / assets;
+    :Запустить Play Mode;
+  }
+  partition Автор {
+    :Вручную пройти выбранные ветки;
+    :Сопоставить порядок кадров,\nзначения и внешний вид с замыслом;
+  }
+repeat while (Найдена ошибка?) is (да) not (нет)
+:Сохранить проект;
+stop
+note right
+  Структура проверяется при прохождении.
+  Покрытие остальных веток зависит
+  от выбранных автором маршрутов.
+end note
+
+@enduml

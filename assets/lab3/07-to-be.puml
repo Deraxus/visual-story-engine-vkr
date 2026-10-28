@@ -1,0 +1,61 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 17
+skinparam shadowing false
+skinparam ArrowColor #475569
+skinparam LineColor #475569
+skinparam RoundCorner 6
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam classBackgroundColor #F1F5F9
+skinparam classBorderColor #475569
+skinparam componentBackgroundColor #EFF6FF
+skinparam componentBorderColor #475569
+skinparam interfaceBackgroundColor #FFFFFF
+skinparam activityBackgroundColor #EFF6FF
+skinparam activityBorderColor #475569
+skinparam activityDiamondBackgroundColor #FEF3C7
+skinparam activityDiamondBorderColor #92400E
+skinparam noteBackgroundColor #FFF7ED
+skinparam noteBorderColor #C2410C
+skinparam sequenceMessageAlign center
+skinparam sequenceParticipantBackgroundColor #EFF6FF
+skinparam sequenceParticipantBorderColor #475569
+skinparam sequenceLifeLineBorderColor #94A3B8
+skinparam sequenceGroupBackgroundColor #F8FAFC
+skinparam sequenceGroupBorderColor #64748B
+
+title М7. TO-BE — проверка сценария до запуска
+start
+repeat
+  partition Автор {
+    :Создать / изменить кадры,\nварианты и ресурсы в StoryEditor;\nFR-08;
+  }
+  partition "Unity Editor и ядро C#" {
+    :Сохранить устойчивые ID и ссылки\nна последовательности;
+    :StoryValidator: проверить ID, ссылки,\nвложенность, типы кадров и лимиты;\nFR-09, NFR-03;
+    if (Структура корректна?) then (нет)
+      :Показать код ошибки и ID элемента;\nFR-10;
+    else (да)
+      :Выполнить контрольные сценарии\nна StoryRunner без интерфейса;\nNFR-01, NFR-02, NFR-06;
+      :Сопоставить трассу кадров\nи итоговые характеристики с ожидаемыми;
+    endif
+  }
+repeat while (Есть ошибки структуры или поведения?) is (да) not (нет)
+partition "Сборка и запуск" {
+  :Повторить структурную проверку\nперед сборкой;
+  :Включить сценарий и ресурсы\nв локальную Android-сборку;\nNFR-04;
+  :Пройти историю и проверить\nвертикальный интерфейс;\nNFR-05;
+}
+stop
+note right
+  Добавление второй истории меняет
+  данные, а не код исполнителя.
+  Улучшение: структурные ошибки
+  обнаруживаются до ручного прохождения.
+end note
+
+@enduml
